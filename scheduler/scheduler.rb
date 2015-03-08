@@ -2,6 +2,7 @@ require 'httparty'
 require 'uri'
 
 DATA_DIR=ENV['OUTDIR'] || File.absolute_path('./data')
+HREFS_URL=ENV['HREFS_URL']
 
 def run(cmd, opt=nil)
   puts " --> running: #{cmd}"
@@ -28,8 +29,7 @@ def start_scraper blog_href
   puts "started: #{name}"
 end
 
-url = 'https://gist.githubusercontent.com/rranshous/30056e2109f43e74d79f/raw/'
-blog_hrefs = HTTParty.get(url).parsed_response
+blog_hrefs = HTTParty.get(HREFS_URL).parsed_response
   .split("\n").map(&:chomp)
   .reject{|i|i.start_with?('#')}
   .reject{|i|i.chomp==''}
