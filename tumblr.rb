@@ -81,7 +81,7 @@ module Tumblr
     def download image_href
       begin
         response = HTTParty.get(image_href)
-      rescue SocketError => _
+      rescue SocketError, Net::ReadTimeout
         retry
       end
       response.parsed_response
