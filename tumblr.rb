@@ -47,7 +47,7 @@ module Tumblr
       begin
         response = HTTParty.get("#{post_href}/xml",
                                 headers: {'Accept'=>'application/xml'})
-      rescue SocketError => _
+      rescue SocketError, Net::ReadTimeout
         retry
       end
       post_data = response.parsed_response
