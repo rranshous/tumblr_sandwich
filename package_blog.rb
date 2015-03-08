@@ -45,7 +45,6 @@ image_client = Tumblr::Image.new
 if use_cache
   post_client.memoize :detail, "#{CACHEDIR}/post.cache"
   post_client.memoize :find_images, "#{CACHEDIR}/post.cache"
-  image_client.memoize :download, "#{CACHEDIR}/image.cache"
 end
 
 blog_client.find_posts(blog_href)
