@@ -1,7 +1,7 @@
 require 'httparty'
 require 'uri'
 
-DATA_DIR=File.absolute_path './data'
+DATA_DIR=ENV['OUTDIR'] || File.absolute_path './data'
 
 def run(cmd, opt=nil)
   puts " --> running: #{cmd}"
