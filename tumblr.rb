@@ -5,11 +5,11 @@ require 'httparty'
 module Tumblr
   class Blog
     def find_posts blog_href
-      # TODO: dont skip page 1
       Enumerator.new do |yielder|
         last_page = nil
-        (1..2).each do |page_number|
-          urls = [url_join(blog_href,'/page/',"/#{page_number}/",'rss').to_s]
+        page_urls(blog_href).each do |page_number, page_url|
+          puts "page: #{page_url}"
+          urls = [page_url]
           feed = Feedjira::Feed.fetch_and_parse(urls)[urls.first]
           if feed.is_a?(Fixnum)
           else
@@ -32,6 +32,15 @@ module Tumblr
     def url_join *args
       args.map { |arg| arg.gsub(%r{^/*(.*?)/*$}, '\1') }.join("/")
     end
+    def page_urls blog_href
+      Enumerator.new do |yielder|
+        yielder << [1, "#{blog_href}/rss"]
+        (2..10000).each do |page_number|
+          yielder << [page_number,
+                      url_join(blog_href,'/page/',"/#{page_number}/",'rss').to_s]
+        end
+      end
+    end
   end
   class Post
     def detail post_href
@@ -51,20 +60,19 @@ module Tumblr
       post_href = post_data[:href]
       Enumerator.new do |yielder|
         post_type = post_data["tumblr"]["posts"]["post"]["type"]
-        if post_type != "photo"
-          return []
-        end
-        image_versions = Hash[
-          post_data["tumblr"]["posts"]["post"]["photo_url"]
-          .map{|d| [d["max_width"].to_i, d["__content__"]] }
-        ]
-        image_versions.each do |width, url|
-          image_data = {
-            href: url,
-            width: width,
-            post: { href: post_href }
-          }
-          yielder << image_data
+        if post_type == "photo"
+          image_versions = Hash[
+            post_data["tumblr"]["posts"]["post"]["photo_url"]
+            .map{|d| [d["max_width"].to_i, d["__content__"]] }
+          ]
+          image_versions.each do |width, url|
+            image_data = {
+              href: url,
+              width: width,
+              post: { href: post_href }
+            }
+            yielder << image_data
+          end
         end
       end
     end

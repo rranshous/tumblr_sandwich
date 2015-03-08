@@ -27,9 +27,13 @@ module Enumerable
 end
 
 def log msg
-  STDERR.puts msg if ARGV.to_a.include? '--debug'
+  puts msg
 end
 
+OUTDIR = ENV['OUTDIR'] || './data'
+CACHEDIR = ENV['CACHEDIR'] || './cache'
+puts "outdir: #{OUTDIR}"
+puts "cachdir: #{CACHEDIR}"
 blog_href = ARGV.shift
 use_cache = ARGV.to_a.include?('--use-cache')
 log "finding posts: #{blog_href}"
@@ -39,12 +43,10 @@ post_client = Tumblr::Post.new
 image_client = Tumblr::Image.new
 
 if use_cache
-  post_client.memoize :detail, './cache/post.cache'
-  post_client.memoize :find_images, './cache/post.cache'
-  image_client.memoize :download, './cache/image.cache'
+  post_client.memoize :detail, "#{CACHEDIR}/post.cache"
+  post_client.memoize :find_images, "#{CACHEDIR}/post.cache"
+  image_client.memoize :download, "#{CACHEDIR}/image.cache"
 end
-
-outputter = TarStream.new STDOUT
 
 blog_client.find_posts(blog_href)
 .lazy.map do |post_details|
@@ -52,20 +54,25 @@ blog_client.find_posts(blog_href)
   post_client.detail(post_details[:href])
     .merge({ page_number: post_details[:page_number] })
 end
-.lazy.map do |full_post_details|
+.map do |full_post_details|
   log "finding images: POST:#{full_post_details[:href]}"
-  post_client.find_images(full_post_details)
+  post_client.find_images(full_post_details).first
 end
-.lazy.flatten.map do |image_details|
-  log "downloading: IMAGE:#{image_details[:href]} :: #{image_details[:post][:href]}"
-  image_details.merge({
-    data: image_client.download(image_details[:href])
-  })
+.flatten.reject(&:nil?).map do |image_details|
+  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(image_details[:href])}"
+  if File.exists? file_path
+    nil
+  else
+    log "downloading: IMAGE:#{image_details[:href]} " \
+        ":: #{image_details[:post][:href]}"
+    image_details.merge({
+      data: image_client.download(image_details[:href])
+    })
+  end
 end
-.map do |image_details_with_data|
-  file_path = "#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
+.reject(&:nil?).map do |image_details_with_data|
+  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
   log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
-  outputter.add image_details_with_data[:data], file_path
-  outputter.flush
+  File.write file_path, image_details_with_data[:data]
 end.to_a
 
