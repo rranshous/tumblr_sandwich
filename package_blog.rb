@@ -1,7 +1,6 @@
 require_relative 'tumblr'
 require_relative 'memoize'
 require_relative 'tar'
-require 'pry'
 
 module Tumblr
   class Blog; include Memoize; end
@@ -28,7 +27,7 @@ module Enumerable
 end
 
 def log msg
-  STDERR.puts msg
+  STDERR.puts msg if ARGV.to_a.include? '--debug'
 end
 
 blog_href = ARGV.shift
@@ -67,5 +66,6 @@ end
   file_path = "#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
   log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
   outputter.add image_details_with_data[:data], file_path
+  outputter.flush
 end.to_a
 
