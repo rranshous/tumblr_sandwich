@@ -13,7 +13,9 @@ end
 def docker_run(name, image, options, command, *args)
   run "docker stop #{name}", :FAILOK
   run "docker rm #{name}", :FAILOK
-  run "docker run -d --name \"#{name}\" #{options} #{image} #{command} #{args.join(' ')}"
+  run "docker run --restart=always -d " + \
+      "--name \"#{name}\" " + \
+      "#{options} #{image} #{command} #{args.join(' ')}"
 end
 
 def start_scraper blog_href
