@@ -73,5 +73,8 @@ end
   file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
   log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
   File.write file_path, image_details_with_data[:data]
-end.to_a
+  file_path
+end.each do |write_path|
+  puts "wrote: #{write_path} successfully"
+end
 

@@ -4,13 +4,14 @@ require 'uri'
 DATA_DIR=File.absolute_path './data'
 
 def run(cmd, opt=nil)
-  puts "running: #{cmd}"
+  puts " --> running: #{cmd}"
   unless system(cmd)
     raise "Error running: #{cmd}" unless opt==:FAILOK
   end
 end
 
 def docker_run(name, image, options, command, *args)
+  puts " -> removing old container"
   run "docker stop #{name}", :FAILOK
   run "docker rm #{name}", :FAILOK
   run "docker run --restart=always -d " + \
