@@ -25,6 +25,7 @@ def start_scraper blog_href
              'rranshous/tumblr_sandwich',
              "-v #{DATA_DIR}:/data",
              blog_href, '--use-cache')
+  puts "started: #{name}"
 end
 
 url = 'https://gist.githubusercontent.com/rranshous/30056e2109f43e74d79f/raw/'

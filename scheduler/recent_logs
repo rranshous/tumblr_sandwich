@@ -1,0 +1,2 @@
+#!/bin/bash
+docker ps | grep tumblr_sandwich | tr -s ' ' | cut -d' ' -f1 | xargs -I{} sh -c "docker logs {} | tail -n 10"

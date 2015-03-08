@@ -50,10 +50,14 @@ end
 blog_client.find_posts(blog_href)
 .lazy.map do |post_details|
   log "detailing: POST:#{post_details[:href]}"
-  post_client.detail(post_details[:href])
-    .merge({ page_number: post_details[:page_number] })
+  details = post_client.detail(post_details[:href])
+  if details
+    details.merge({ page_number: post_details[:page_number] })
+  else
+   nil
+  end
 end
-.map do |full_post_details|
+.reject(&:nil?).map do |full_post_details|
   log "finding images: POST:#{full_post_details[:href]}"
   post_client.find_images(full_post_details).first
 end
