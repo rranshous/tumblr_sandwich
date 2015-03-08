@@ -4,12 +4,12 @@ require 'httparty'
 
 module Tumblr
   class Blog
-    def self.find_posts blog_href
+    def find_posts blog_href
       # TODO: dont skip page 1
       Enumerator.new do |yielder|
         last_page = nil
         (1..2).each do |page_number|
-          urls = [self.url_join(blog_href,'/page/',"/#{page_number}/",'rss').to_s]
+          urls = [url_join(blog_href,'/page/',"/#{page_number}/",'rss').to_s]
           feed = Feedjira::Feed.fetch_and_parse(urls)[urls.first]
           if feed.is_a?(Fixnum)
           else
@@ -29,12 +29,12 @@ module Tumblr
         end end
     end
     private
-    def self.url_join *args
+    def url_join *args
       args.map { |arg| arg.gsub(%r{^/*(.*?)/*$}, '\1') }.join("/")
     end
   end
   class Post
-    def self.detail post_href
+    def detail post_href
       begin
         response = HTTParty.get("#{post_href}/xml",
                                 headers: {'Accept'=>'application/xml'})
@@ -47,7 +47,7 @@ module Tumblr
       end
       return { href: post_href }.merge post_data
     end
-    def self.find_images post_data
+    def find_images post_data
       post_href = post_data[:href]
       Enumerator.new do |yielder|
         post_type = post_data["tumblr"]["posts"]["post"]["type"]
@@ -70,7 +70,7 @@ module Tumblr
     end
   end
   class Image
-    def self.download image_href
+    def download image_href
       begin
         response = HTTParty.get(image_href)
       rescue SocketError => _
