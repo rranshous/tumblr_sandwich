@@ -21,7 +21,8 @@ end
 
 def start_scraper blog_href
   name = "scrape-#{URI(blog_href).host}"
-  docker_run(name, 'tumblr_sandwich',
+  docker_run(name,
+             'rranshous/tumblr_sandwich',
              "-v #{DATA_DIR}:/data",
              blog_href, '--use-cache')
 end
