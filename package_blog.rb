@@ -27,36 +27,45 @@ module Enumerable
   end
 end
 
+def log msg
+  STDERR.puts msg
+end
+
 blog_href = ARGV.shift
-STDERR.puts "finding posts: #{blog_href}"
+use_cache = ARGV.to_a.include?('--use-cache')
+log "finding posts: #{blog_href}"
 
 blog_client = Tumblr::Blog.new
 post_client = Tumblr::Post.new
-post_client.memoize :detail, './cache/post.cache'
-post_client.memoize :find_images, './cache/post.cache'
 image_client = Tumblr::Image.new
-image_client.memoize :download, './cache/image.cache'
+
+if use_cache
+  post_client.memoize :detail, './cache/post.cache'
+  post_client.memoize :find_images, './cache/post.cache'
+  image_client.memoize :download, './cache/image.cache'
+end
 
 outputter = TarStream.new STDOUT
 
 blog_client.find_posts(blog_href)
 .lazy.map do |post_details|
-  STDERR.puts "detailing: POST:#{post_details[:href]}"
+  log "detailing: POST:#{post_details[:href]}"
   post_client.detail(post_details[:href])
+    .merge({ page_number: post_details[:page_number] })
 end
 .lazy.map do |full_post_details|
-  STDERR.puts "finding images: POST:#{full_post_details[:href]}"
+  log "finding images: POST:#{full_post_details[:href]}"
   post_client.find_images(full_post_details)
 end
 .lazy.flatten.map do |image_details|
-  STDERR.puts "downloading: IMAGE:#{image_details[:href]} :: #{image_details[:post][:href]}"
+  log "downloading: IMAGE:#{image_details[:href]} :: #{image_details[:post][:href]}"
   image_details.merge({
     data: image_client.download(image_details[:href])
   })
 end
 .map do |image_details_with_data|
   file_path = "#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
-  STDERR.puts "writing [#{image_details_with_data[:data].length}\: #{file_path}"
+  log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
   outputter.add image_details_with_data[:data], file_path
 end.to_a
 
