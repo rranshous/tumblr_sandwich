@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker ps | grep " rranshous/tumblr_sandwich" | tr -s ' ' | cut -d' ' -f1 | xargs -I{} docker pause {}
+
