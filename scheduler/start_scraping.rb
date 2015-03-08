@@ -21,10 +21,11 @@ def docker_run(name, image, options, command, *args)
 end
 
 def start_scraper blog_href
-  name = "scrape-#{URI(blog_href).host}"
+  host = URI(blog_href).host
+  name = "scrape-#{host}"
   docker_run(name,
              'rranshous/tumblr_sandwich',
-             "-v #{DATA_DIR}:/data",
+             "-v #{DATA_DIR}/#{host}:/data",
              blog_href, '--use-cache')
   puts "started: #{name}"
 end
