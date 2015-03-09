@@ -27,7 +27,7 @@ def start_scraper blog_href
   docker_run(name,
              'rranshous/tumblr-sandwich:latest',
              "-v #{DATA_DIR}/#{host}:/data",
-             blog_href, '--use-cache')
+             blog_href) #, '--use-cache')
   puts "started: #{name}"
 end
 
