@@ -16,7 +16,7 @@ def docker_run(name, image, options, command, *args)
   puts " -> removing old container"
   run "docker stop #{name}", :FAILOK
   run "docker rm #{name}", :FAILOK
-  run "docker run --restart=always -d " + \
+  run "docker run --restart=on-failure -d " + \
       "--name \"#{name}\" " + \
       "#{options} #{image} #{command} #{args.join(' ')}"
 end
