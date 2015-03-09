@@ -62,7 +62,9 @@ end
   post_client.find_images(full_post_details).first
 end
 .flatten.reject(&:nil?).map do |image_details|
-  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(image_details[:href])}"
+  href = image_details_with_data[:href]
+  ext = href.split('.').last
+  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(href)}.#{ext}"
   if File.exists? file_path
     nil
   else
