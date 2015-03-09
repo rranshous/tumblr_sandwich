@@ -74,7 +74,9 @@ end
   end
 end
 .reject(&:nil?).map do |image_details_with_data|
-  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(image_details_with_data[:href])}"
+  href = image_details_with_data[:href]
+  ext = href.split('.').last
+  file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(href)}.#{ext}"
   log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
   File.write file_path, image_details_with_data[:data]
   file_path
