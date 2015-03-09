@@ -81,4 +81,4 @@ end
 end.each do |write_path|
   puts "wrote: #{write_path} successfully"
 end
-
+puts "done scraping: #{blog_href}"

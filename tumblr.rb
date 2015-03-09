@@ -1,16 +1,20 @@
 require 'uri'
 require 'feedjira'
 require 'httparty'
+require 'persistent_httparty'
 
 module Tumblr
   class Blog
+    include HTTParty
+    persistent_connection_adapter
+
     def find_posts blog_href
       Enumerator.new do |yielder|
         last_page = nil
         page_urls(blog_href).each do |page_number, page_url|
           puts "page: #{page_url}"
-          urls = [page_url]
-          feed = Feedjira::Feed.fetch_and_parse(urls)[urls.first]
+          page_data = self.class.get(page_url).body
+          feed = Feedjira::Feed.parse(page_data)[urls.first]
           if feed.is_a?(Fixnum)
           else
             if feed.entries.length == 0
@@ -43,10 +47,13 @@ module Tumblr
     end
   end
   class Post
+    include HTTParty
+    persistent_connection_adapter
+
     def detail post_href
       begin
-        response = HTTParty.get("#{post_href}/xml",
-                                headers: {'Accept'=>'application/xml'})
+        response = self.class.get("#{post_href}/xml",
+                                  headers: {'Accept'=>'application/xml'})
       rescue SocketError, Net::ReadTimeout
         retry
       end
@@ -78,9 +85,12 @@ module Tumblr
     end
   end
   class Image
+    include HTTParty
+    persistent_connection_adapter
+
     def download image_href
       begin
-        response = HTTParty.get(image_href)
+        response = self.class.get(image_href)
       rescue SocketError, Net::ReadTimeout
         retry
       end
