@@ -14,7 +14,7 @@ module Tumblr
         page_urls(blog_href).each do |page_number, page_url|
           puts "page: #{page_url}"
           page_data = self.class.get(page_url).body
-          feed = Feedjira::Feed.parse(page_data)[urls.first]
+          feed = Feedjira::Feed.parse(page_data)
           if feed.is_a?(Fixnum)
           else
             if feed.entries.length == 0
