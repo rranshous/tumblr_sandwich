@@ -1,12 +1,5 @@
 require_relative 'tumblr'
-require_relative 'memoize'
 require_relative 'tar'
-
-module Tumblr
-  class Blog; include Memoize; end
-  class Post; include Memoize; end
-  class Image; include Memoize; end
-end
 
 module Enumerable
   def flatten
@@ -35,17 +28,11 @@ CACHEDIR = ENV['CACHEDIR'] || './cache'
 puts "outdir: #{OUTDIR}"
 puts "cachdir: #{CACHEDIR}"
 blog_href = ARGV.shift
-use_cache = ARGV.to_a.include?('--use-cache')
 log "finding posts: #{blog_href}"
 
 blog_client = Tumblr::Blog.new
 post_client = Tumblr::Post.new
 image_client = Tumblr::Image.new
-
-if use_cache
-  post_client.memoize :detail, "#{CACHEDIR}/post.cache"
-  post_client.memoize :find_images, "#{CACHEDIR}/post.cache"
-end
 
 blog_client.find_posts(blog_href)
 .lazy.map do |post_details|
