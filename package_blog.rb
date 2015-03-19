@@ -24,10 +24,9 @@ def log msg
 end
 
 OUTDIR = ENV['OUTDIR'] || './data'
-CACHEDIR = ENV['CACHEDIR'] || './cache'
 puts "outdir: #{OUTDIR}"
-puts "cachdir: #{CACHEDIR}"
 blog_href = ARGV.shift
+full_scrape = ARGV.include? '--full'
 log "finding posts: #{blog_href}"
 
 blog_client = Tumblr::Blog.new
@@ -53,7 +52,10 @@ end
   ext = href.split('.').last
   file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(href)}.#{ext}"
   if File.exists? file_path
-    nil
+    unless full_scrape
+      puts "done, found already downloaded image: #{file_path}"
+      break
+    end
   else
     log "downloading: IMAGE:#{image_details[:href]} " \
         ":: #{image_details[:post][:href]}"
