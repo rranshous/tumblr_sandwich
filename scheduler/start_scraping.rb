@@ -17,6 +17,7 @@ def docker_run(name, image, options, command, *args)
   run "docker stop #{name}", :FAILOK
   run "docker rm #{name}", :FAILOK
   run "docker run --restart=on-failure -d " + \
+      "-e http_proxy=#{ENV['http_proxy']} " + \
       "--name \"#{name}\" " + \
       "#{options} #{image} #{command} #{args.join(' ')}"
 end
