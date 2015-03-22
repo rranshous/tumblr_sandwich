@@ -1,1 +1,2 @@
-flag to use cache: --use-cache
+
+flag to do full scrape (not stop on seen): --full
