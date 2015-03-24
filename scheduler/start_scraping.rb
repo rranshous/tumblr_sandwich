@@ -14,7 +14,7 @@ end
 
 def docker_run(name, image, options, command, *args)
   puts " -> removing old container"
-  run "docker stop #{name}", :FAILOK
+#  run "docker stop #{name}", :FAILOK
   run "docker rm #{name}", :FAILOK
   run "docker run --restart=on-failure -d " + \
       "-e http_proxy=#{ENV['http_proxy']} " + \
