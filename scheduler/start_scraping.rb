@@ -4,6 +4,7 @@ require 'uri'
 
 DATA_DIR=ENV['OUTDIR'] || File.absolute_path('./data')
 HREFS_URL=ENV['HREFS_URL']
+$is_full = ARGV.include? '--full'
 
 def run(cmd, opt=nil)
   puts " --> running: #{cmd}"
@@ -25,10 +26,12 @@ end
 def start_scraper blog_href
   host = URI(blog_href).host
   name = "scrape-#{host}"
-  docker_run(name,
-             'rranshous/tumblr-sandwich:latest',
-             "-v #{DATA_DIR}/#{host}:/data",
-             blog_href) #, '--use-cache')
+  args = [name,
+          'rranshous/tumblr-sandwich:latest',
+          "-v #{DATA_DIR}/#{host}:/data",
+          blog_href]
+  args << '--full' if $is_full
+  docker_run(*args)
   puts "started: #{name}"
 end
 
