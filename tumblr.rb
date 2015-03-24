@@ -72,20 +72,33 @@ module Tumblr
       Enumerator.new do |yielder|
         post_type = post_data["tumblr"]["posts"]["post"]["type"]
         if post_type == "photo"
-          image_versions = Hash[
-            post_data["tumblr"]["posts"]["post"]["photo_url"]
-            .map{|d| [d["max_width"].to_i, d["__content__"]] }
-          ]
-          image_versions.each do |width, url|
-            image_data = {
-              href: url,
-              width: width,
-              post: { href: post_href }
-            }
-            yielder << image_data
+          if photoset_data = post_data['tumblr']['posts']['post']['photoset']
+            puts "MANY PHOTOS"
+            photoset_data['photo'].each do |photo_data|
+              photo_data = main_photo_data post_href, photo_data['photo_url']
+              yielder << photo_data
+            end
+          else
+            photo_data = main_photo_data post_href,
+                                 post_data['tumblr']['posts']['post']['photo_url']
+            yielder << photo_data
           end
         end
       end
+    end
+    private
+    def main_photo_data post_href, photos_data
+      image_versions = Hash[
+        #post_data["tumblr"]["posts"]["post"]["photo_url"]
+        photos_data
+        .map{|d| [d["max_width"].to_i, d["__content__"]] }
+      ]
+      width, url = image_versions.first
+      return {
+        href: url,
+        width: width,
+        post: { href: post_href }
+      }
     end
   end
   class Image

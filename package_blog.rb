@@ -45,7 +45,7 @@ blog_client.find_posts(blog_href)
 end
 .reject(&:nil?).map do |full_post_details|
   log "finding images: POST:#{full_post_details[:href]}"
-  post_client.find_images(full_post_details).first
+  post_client.find_images(full_post_details)
 end
 .flatten.reject(&:nil?).map do |image_details|
   href = image_details[:href]
