@@ -56,6 +56,8 @@ end
       puts "done, found already downloaded image: #{file_path}"
       break
     end
+    puts "not redownloading"
+    image_details
   else
     log "downloading: IMAGE:#{image_details[:href]} " \
         ":: #{image_details[:post][:href]}"
@@ -68,8 +70,17 @@ end
   href = image_details_with_data[:href]
   ext = href.split('.').last
   file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(href)}.#{ext}"
-  log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
-  File.write file_path, image_details_with_data[:data]
+  unless File.exists? file_path
+    log "writing [#{image_details_with_data[:data].length}\: #{file_path}"
+    File.write file_path, image_details_with_data[:data]
+  end
+  meta_path = "#{file_path}.meta"
+  unless File.exists? meta_path
+    log "writing meta"
+    meta = image_details_with_data.dup
+    meta.delete(:data)
+    File.write meta_path, meta.to_json
+  end
   file_path
 end.each do |write_path|
   puts "wrote: #{write_path} successfully"
