@@ -67,6 +67,10 @@ end
   end
 end
 .reject(&:nil?).map do |image_details_with_data|
+  if image_details_with_data[:data].nil?
+    puts "Error: download data is nil"
+    next
+  end
   href = image_details_with_data[:href]
   ext = href.split('.').last
   file_path = "#{OUTDIR}/#{Base64.urlsafe_encode64(href)}.#{ext}"
