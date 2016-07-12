@@ -12,6 +12,10 @@ module Tumblr
       Enumerator.new do |yielder|
         last_page = nil
         page_urls(blog_href).each do |page_number, page_url|
+          if !page_url.start_with? 'http'
+            puts "adding http prefix to url"
+            page_url = "https://#{page_url}"
+          end
           puts "page: #{page_url}"
           page_data = self.class.get(page_url).body
           begin
