@@ -6,8 +6,6 @@ require 'persistent_httparty'
 module Tumblr
   class Blog
     include HTTParty
-    persistent_connection_adapter
-    follow_redirects
 
     def find_posts blog_href
       Enumerator.new do |yielder|
@@ -20,11 +18,8 @@ module Tumblr
           puts "page: #{page_url}"
           begin
             page_data = self.class.get(page_url).body
-          rescue HTTParty::RedirectionTooDeep
-            puts "error getting page, redirect too deep"
-            page_url = page_url.sub('https','http')
-            puts "retrying with url: #{page_url}"
-            page_data = self.class.get(page_url).body
+          rescue SocketError, Net::ReadTimeout
+            retry
           end
           begin
             feed = Feedjira::Feed.parse(page_data)
@@ -67,7 +62,6 @@ module Tumblr
   class Post
     include HTTParty
     persistent_connection_adapter
-    follow_redirects
 
     def detail post_href
       begin
@@ -119,7 +113,6 @@ module Tumblr
   class Image
     include HTTParty
     persistent_connection_adapter
-    follow_redirects
 
     def download image_href
       begin
