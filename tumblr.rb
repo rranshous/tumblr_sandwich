@@ -18,10 +18,18 @@ module Tumblr
             page_url = "https://#{page_url}"
           end
           puts "page: #{page_url}"
-          page_data = self.class.get(page_url).body
+          begin
+            page_data = self.class.get(page_url).body
+          rescue HTTParty::RedirectionTooDeep
+            puts "error getting page, redirect too deep"
+            page_url = page_url.sub('https','http')
+            puts "retrying with url: #{page_url}"
+            page_data = self.class.get(page_url).body
+          end
           begin
             feed = Feedjira::Feed.parse(page_data)
           rescue Feedjira::NoParserAvailable
+            puts "could not parse"
             break
           end
           if feed.is_a?(Fixnum)
@@ -39,7 +47,8 @@ module Tumblr
             end
           end
           last_page = page_number
-        end end
+        end
+      end
     end
     private
     def url_join *args
