@@ -7,6 +7,7 @@ module Tumblr
   class Blog
     include HTTParty
     persistent_connection_adapter
+    follow_redirects
 
     def find_posts blog_href
       Enumerator.new do |yielder|
@@ -57,6 +58,7 @@ module Tumblr
   class Post
     include HTTParty
     persistent_connection_adapter
+    follow_redirects
 
     def detail post_href
       begin
@@ -108,6 +110,7 @@ module Tumblr
   class Image
     include HTTParty
     persistent_connection_adapter
+    follow_redirects
 
     def download image_href
       begin
