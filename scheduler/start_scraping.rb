@@ -69,7 +69,7 @@ blog_hrefs = HTTParty.get(HREFS_URL).parsed_response
   .reject{|i|i.start_with?('#')}
   .reject{|i|i.chomp==''}
 blen = blog_hrefs.length
-blog_hrefs.reverse.each_with_index do |blog_href, i|
+blog_hrefs.each_with_index do |blog_href, i|
   $log_prefix = "[#{i+1} / #{blen} | #{blog_href}]"
   while $limit_parallel && count_scrapers >= MAX_PARALLEL
     log 'too many scrapers, sleeping'

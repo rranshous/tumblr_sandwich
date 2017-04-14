@@ -1,2 +1,56 @@
+download images from tumblr blogs
+uses docker
+started as expirement in streaming input / output to docker. originally took stream of domains on STDIN and pushed tars through STDOUT
+---
 
-flag to do full scrape (not stop on seen): --full
+The docker image built by `Dockerfile` scrapes a single blog in to a mounted volume (/data)
+The scheduler (exampled below) starts containers based on this image to do the downloading
+---
+
+if you are going to scape many domains use the scheduler script `start_scraping.rb`
+(see it's sibling scripts in `./scheduler/`)
+
+it manages batches of domain scrapes and has options for parallelism and such
+
+your provide the list of domains to scrape via a text file retrieved over HTTP(S)
+
+
+minimum command. will spawn scrapers for all the domains, aka max parallization.
+will download images until it reaches an image it's already downloaded
+most conservative mode, fails fast
+outputs images in to `./data/<domain>`
+```
+HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping
+```
+
+setup the scrapers a bit more sloppily.
+if it runs across a domain and finds a scraper already running for it (god forbid!) it will simply report and continue on to the next domain
+```
+HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping --failok
+```
+
+specify the dir to download to
+outputs images in to `./data/<OUTDIR>`
+```
+OUTDIR=/data/scrapes/ HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping
+```
+
+run the scrapers in the foreground serially
+```
+HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping --serial
+```
+
+don't stop scraping when you hit an image you've already downloaded, just report and keep going
+aka full rescan
+```
+HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping --full
+```
+
+run scrapers in parallel but limit the max # running at a time
+default # of parallel scrapes is 10, can override with `MAX_PARALLEL`
+```
+HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping --limit-parallel
+MAX_PARALLEL=5 HREFS_URL=http://localhost:5000/list_o_domains.txt bundle exec ruby tumblr_start_scraping --limit-parallel
+```
+
+
